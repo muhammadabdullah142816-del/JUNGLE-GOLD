@@ -1,7 +1,18 @@
 "use client";
 import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/lib/supabase"; // needed for realtime only
-import { fetchOrders, updateOrderStatus, fetchProducts, createProduct, updateProduct, deleteProduct, uploadProductImage, fetchOperators, createOperator, updateOperator, deleteOperator, uploadOperatorImage } from "@/lib/api";
+import { fetchOrders, fetchProducts, fetchOperators } from "@/lib/api";
+import {
+  createProductAction,
+  updateProductAction,
+  deleteProductAction,
+  uploadProductImageAction,
+  updateOrderStatusAction,
+  createOperatorAction,
+  updateOperatorAction,
+  deleteOperatorAction,
+  uploadOperatorImageAction
+} from "@/lib/admin-actions";
 import { logout } from "./login/actions";
 import type { Order, Product, OrderStatus, ProductVariant, Operator } from "@/types/database";
 import {
@@ -138,12 +149,11 @@ function OrdersTab() {
     setOrders(orders.map(o => o.id === id ? { ...o, status: newStatus as OrderStatus } : o));
     
     try {
-      await updateOrderStatus(id, newStatus as OrderStatus);
+      await updateOrderStatusAction(id, newStatus as OrderStatus);
     } catch (err: unknown) {
-      setOrders(originalOrders); // Revert on error
-      if (err instanceof Error) {
-        alert("Failed to update status: " + err.message + "\n\n(Make sure you have an RLS policy allowing UPDATE)");
-      }
+      // Revert on error
+      setOrders(originalOrders);
+      if (err instanceof Error) alert(err.message);
     }
   }
 
@@ -347,7 +357,9 @@ function ProductsTab() {
     setIsUploading(true);
     try {
       const file = e.target.files[0];
-      const url = await uploadProductImage(file);
+      const formData = new FormData();
+      formData.append("file", file);
+      const url = await uploadProductImageAction(formData);
       setImages([...images, url]);
     } catch (err: unknown) {
       if (err instanceof Error) alert("Upload failed: " + err.message);
@@ -362,9 +374,9 @@ function ProductsTab() {
     
     try {
       if (editingProduct) {
-        await updateProduct(editingProduct.id, payload);
+        await updateProductAction(editingProduct.id, payload);
       } else {
-        await createProduct(payload);
+        await createProductAction(payload);
       }
       await loadProducts();
       setIsModalOpen(false);
@@ -377,7 +389,7 @@ function ProductsTab() {
   async function handleDelete(id: string) {
     if (!confirm("Are you sure you want to delete this product?")) return;
     try {
-      await deleteProduct(id);
+      await deleteProductAction(id);
       await loadProducts();
     } catch (err: unknown) {
       if (err instanceof Error) alert("Failed to delete product: " + err.message);
@@ -567,7 +579,10 @@ function OperatorsTab() {
     if (!e.target.files || e.target.files.length === 0) return;
     setIsUploading(true);
     try {
-      const url = await uploadOperatorImage(e.target.files[0]);
+      const file = e.target.files[0];
+      const formData = new FormData();
+      formData.append("file", file);
+      const url = await uploadOperatorImageAction(formData);
       setImageUrl(url);
     } catch (err: unknown) {
       if (err instanceof Error) alert("Upload failed: " + err.message);
@@ -581,9 +596,9 @@ function OperatorsTab() {
     const payload = { name, role, description, image_url: imageUrl };
     try {
       if (editingOp) {
-        await updateOperator(editingOp.id, payload);
+        await updateOperatorAction(editingOp.id, payload);
       } else {
-        await createOperator(payload);
+        await createOperatorAction(payload);
       }
       await loadOperators();
       setIsModalOpen(false);
@@ -596,7 +611,7 @@ function OperatorsTab() {
   async function handleDelete(id: string) {
     if (!confirm("Delete this team member?")) return;
     try {
-      await deleteOperator(id);
+      await deleteOperatorAction(id);
       await loadOperators();
     } catch (err: unknown) {
       if (err instanceof Error) alert("Failed to delete: " + err.message);

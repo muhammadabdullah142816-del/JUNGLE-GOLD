@@ -1,5 +1,5 @@
 import { supabase } from "./supabase";
-import type { Order, Product, CreateOrderPayload, CreateProductPayload, OrderStatus, Operator, CreateOperatorPayload } from "@/types/database";
+import type { Order, Product, CreateOrderPayload, OrderStatus, Operator } from "@/types/database";
 
 // ─── Security Helpers ────────────────────────────────────────────────────────
 
@@ -11,7 +11,7 @@ function sanitize(input: string): string {
 /** Validate Pakistan phone format: 03XXXXXXXXX or +923XXXXXXXXX */
 const PK_PHONE_REGEX = /^(03\d{9}|\+923\d{9})$/;
 
-// ─── Order CRUD ──────────────────────────────────────────────────────────────
+// ─── Order Creation (Public Storefront) ──────────────────────────────────────
 
 export async function createOrder(payload: CreateOrderPayload): Promise<Order> {
   // 1. Sanitize text fields
@@ -21,7 +21,7 @@ export async function createOrder(payload: CreateOrderPayload): Promise<Order> {
     city: sanitize(payload.city),
     address: sanitize(payload.address),
     items: payload.items,
-    total_amount: payload.total_amount,
+    total_amount: 0,
   };
 
   // 2. Validate required fields
@@ -34,31 +34,45 @@ export async function createOrder(payload: CreateOrderPayload): Promise<Order> {
     throw new Error("Invalid phone number format. Use 03XXXXXXXXX or +923XXXXXXXXX");
   }
 
-  // 4. Verify total against actual product prices (anti-tampering)
-  const { data: products } = await supabase
-    .from("products")
-    .select("id, variants");
-
-  if (products && products.length > 0) {
-    let verifiedTotal = 0;
-    for (const item of cleanPayload.items) {
-      // Find the product containing this variant
-      const product = products.find((p: { id: string; variants: { size: string; price: number }[] }) =>
-        p.variants?.some((v: { size: string; price: number }) => v.size === item.size)
-      );
-      if (product) {
-        const variant = product.variants.find((v: { size: string; price: number }) => v.size === item.size);
-        if (variant) {
-          verifiedTotal += variant.price * item.quantity;
-        }
-      }
-    }
-    // Use server-verified total instead of client-submitted one
-    if (verifiedTotal > 0) {
-      cleanPayload.total_amount = verifiedTotal;
-    }
+  if (!cleanPayload.items || cleanPayload.items.length === 0) {
+    throw new Error("Cart is empty");
   }
 
+  // 4. Strict Item Integrity & In-Stock Verification
+  const { data: products, error: productErr } = await supabase
+    .from("products")
+    .select("id, title, variants");
+
+  if (productErr || !products) {
+    throw new Error("Failed to verify product availability");
+  }
+
+  let verifiedTotal = 0;
+
+  for (const item of cleanPayload.items) {
+    // Find matching product
+    const product = products.find((p) => p.id === item.id);
+    if (!product) {
+      throw new Error(`Product '${item.title}' is no longer available.`);
+    }
+
+    // Find matching variant
+    const variant = product.variants?.find((v: { size: string; price: number; in_stock: boolean }) => v.size === item.size);
+    if (!variant) {
+      throw new Error(`Size '${item.size}' for '${product.title}' is not valid.`);
+    }
+
+    if (!variant.in_stock) {
+      throw new Error(`Item '${product.title}' (${variant.size}) is currently out of stock.`);
+    }
+
+    // Accumulate total using verified server price
+    verifiedTotal += variant.price * item.quantity;
+  }
+
+  cleanPayload.total_amount = verifiedTotal;
+
+  // 5. Force status to "Pending"
   const { data, error } = await supabase
     .from("orders")
     .insert({ ...cleanPayload, status: "Pending" })
@@ -69,6 +83,8 @@ export async function createOrder(payload: CreateOrderPayload): Promise<Order> {
   return data as Order;
 }
 
+// ─── Public Fetch Functions ──────────────────────────────────────────────────
+
 export async function fetchOrders(): Promise<Order[]> {
   const { data, error } = await supabase
     .from("orders")
@@ -77,15 +93,6 @@ export async function fetchOrders(): Promise<Order[]> {
 
   if (error) throw new Error("Failed to fetch orders: " + error.message);
   return data as Order[];
-}
-
-export async function updateOrderStatus(orderId: string, status: OrderStatus): Promise<void> {
-  const { error } = await supabase
-    .from("orders")
-    .update({ status })
-    .eq("id", orderId);
-
-  if (error) throw new Error("Failed to update status: " + error.message);
 }
 
 export async function fetchProducts(): Promise<Product[]> {
@@ -98,55 +105,6 @@ export async function fetchProducts(): Promise<Product[]> {
   return data as Product[];
 }
 
-export async function createProduct(payload: CreateProductPayload): Promise<Product> {
-  const { data, error } = await supabase
-    .from("products")
-    .insert(payload)
-    .select()
-    .single();
-
-  if (error) throw new Error("Failed to create product: " + error.message);
-  return data as Product;
-}
-
-export async function updateProduct(id: string, payload: CreateProductPayload): Promise<void> {
-  const { error } = await supabase
-    .from("products")
-    .update(payload)
-    .eq("id", id);
-
-  if (error) throw new Error("Failed to update product: " + error.message);
-}
-
-export async function deleteProduct(id: string): Promise<void> {
-  const { error } = await supabase
-    .from("products")
-    .delete()
-    .eq("id", id);
-
-  if (error) throw new Error("Failed to delete product: " + error.message);
-}
-
-export async function uploadProductImage(file: File): Promise<string> {
-  const fileExt = file.name.split(".").pop();
-  const fileName = `${Math.random()}.${fileExt}`;
-  const filePath = `${fileName}`;
-
-  const { error: uploadError } = await supabase.storage
-    .from("product-images")
-    .upload(filePath, file);
-
-  if (uploadError) throw new Error("Failed to upload image: " + uploadError.message);
-
-  const { data } = supabase.storage
-    .from("product-images")
-    .getPublicUrl(filePath);
-
-  return data.publicUrl;
-}
-
-// ─── Operator CRUD ──────────────────────────────────────────────────────────
-
 export async function fetchOperators(): Promise<Operator[]> {
   const { data, error } = await supabase
     .from("operators")
@@ -155,50 +113,4 @@ export async function fetchOperators(): Promise<Operator[]> {
 
   if (error) throw new Error("Failed to fetch operators: " + error.message);
   return data as Operator[];
-}
-
-export async function createOperator(payload: CreateOperatorPayload): Promise<Operator> {
-  const { data, error } = await supabase
-    .from("operators")
-    .insert(payload)
-    .select()
-    .single();
-
-  if (error) throw new Error("Failed to create operator: " + error.message);
-  return data as Operator;
-}
-
-export async function updateOperator(id: string, payload: CreateOperatorPayload): Promise<void> {
-  const { error } = await supabase
-    .from("operators")
-    .update(payload)
-    .eq("id", id);
-
-  if (error) throw new Error("Failed to update operator: " + error.message);
-}
-
-export async function deleteOperator(id: string): Promise<void> {
-  const { error } = await supabase
-    .from("operators")
-    .delete()
-    .eq("id", id);
-
-  if (error) throw new Error("Failed to delete operator: " + error.message);
-}
-
-export async function uploadOperatorImage(file: File): Promise<string> {
-  const fileExt = file.name.split(".").pop();
-  const fileName = `operator-${Date.now()}.${fileExt}`;
-
-  const { error: uploadError } = await supabase.storage
-    .from("product-images")
-    .upload(fileName, file);
-
-  if (uploadError) throw new Error("Failed to upload image: " + uploadError.message);
-
-  const { data } = supabase.storage
-    .from("product-images")
-    .getPublicUrl(fileName);
-
-  return data.publicUrl;
 }
