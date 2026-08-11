@@ -23,7 +23,7 @@ export default function ProductSchema({ products }: { products: Product[] }) {
       "mpn": `JUNGLEGOLD-${product.id.substring(0, 6).toUpperCase()}`,
       "brand": {
         "@type": "Brand",
-        "name": "Jungle Gold Raw Honey"
+        "name": "Jungle Gold Raw Honey Pakistan"
       },
       "category": "Organic Food > Honey & Sweeteners > Raw Honey",
       "certification": [
@@ -48,7 +48,35 @@ export default function ProductSchema({ products }: { products: Product[] }) {
           "availability": v.in_stock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
           "seller": {
             "@type": "Organization",
-            "name": "Jungle Gold"
+            "name": "Jungle Gold Pakistan",
+            "url": "https://junglegold.pk"
+          },
+          "shippingDetails": {
+            "@type": "OfferShippingDetails",
+            "shippingRate": {
+              "@type": "MonetaryAmount",
+              "value": "0",
+              "currency": "PKR"
+            },
+            "shippingDestination": {
+              "@type": "DefinedRegion",
+              "addressCountry": "PK"
+            },
+            "deliveryTime": {
+              "@type": "ShippingDeliveryTime",
+              "handlingTime": {
+                "@type": "QuantitativeValue",
+                "minValue": 1,
+                "maxValue": 2,
+                "unitCode": "DAY"
+              },
+              "transitTime": {
+                "@type": "QuantitativeValue",
+                "minValue": 2,
+                "maxValue": 4,
+                "unitCode": "DAY"
+              }
+            }
           },
           "url": "https://junglegold.pk/#products"
         }))

@@ -3,12 +3,12 @@ export default function OrganizationSchema() {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
     '@id': 'https://junglegold.pk/#organization',
-    name: 'Jungle Gold Raw Honey',
+    name: 'Jungle Gold Raw Honey Pakistan',
     url: 'https://junglegold.pk',
-    logo: 'https://junglegold.pk/logo.png',
-    image: 'https://junglegold.pk/og-image.jpg',
+    logo: 'https://junglegold.pk/brand-logo.png',
+    image: 'https://junglegold.pk/brand-logo.png',
     description:
-      'Pakistan premier producer of 100% pure, unpasteurized, unheated wild forest honey harvested from Swat, Skardu, and Margalla Hills.',
+      "Pakistan's premier producer of 100% pure raw jungle honey and unpasteurized organic Sidr honey harvested from Swat, Skardu, and Margalla Hills. Delivering nationwide via Cash on Delivery.",
     address: {
       '@type': 'PostalAddress',
       addressLocality: 'Gujrat',
@@ -20,19 +20,68 @@ export default function OrganizationSchema() {
       latitude: '32.5742',
       longitude: '74.0754',
     },
-    areaServed: {
-      '@type': 'Country',
-      name: 'Pakistan',
-    },
-    priceRange: '$$',
-    paymentAccepted: 'Cash, Bank Transfer',
+    areaServed: [
+      {
+        '@type': 'Country',
+        name: 'Pakistan',
+      },
+      {
+        '@type': 'City',
+        name: 'Lahore',
+      },
+      {
+        '@type': 'City',
+        name: 'Karachi',
+      },
+      {
+        '@type': 'City',
+        name: 'Islamabad',
+      },
+      {
+        '@type': 'City',
+        name: 'Rawalpindi',
+      },
+      {
+        '@type': 'City',
+        name: 'Peshawar',
+      },
+      {
+        '@type': 'City',
+        name: 'Gujrat',
+      },
+      {
+        '@type': 'City',
+        name: 'Faisalabad',
+      },
+      {
+        '@type': 'City',
+        name: 'Multan',
+      },
+    ],
+    priceRange: 'PKR 1,200 - PKR 4,500',
+    paymentAccepted: 'Cash on Delivery (COD), Online Bank Transfer',
     currenciesAccepted: 'PKR',
     knowsAbout: [
-      'Raw Sidr Honey',
-      'Organic Honey',
-      'Unpasteurized Wild Honey',
+      'Pure Raw Jungle Honey',
+      'Unpasteurized Organic Honey',
+      'Organic Sidr Beri Honey Pakistan',
+      'Wild Forest Honey Swat & Skardu',
+      'PCSIR Lab Tested Raw Honey',
       'Bee Pollen and Propolis',
     ],
+    makesOffer: {
+      '@type': 'Offer',
+      itemOffered: {
+        '@type': 'Service',
+        name: 'Nationwide Cash on Delivery (COD) Raw Honey Shipping',
+      },
+      priceCurrency: 'PKR',
+      price: '0.00',
+      eligibleRegion: {
+        '@type': 'Country',
+        name: 'Pakistan',
+      },
+    },
   };
 
   return (

@@ -20,16 +20,20 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL("https://junglegold.pk"),
   title: {
-    default: "Jungle Gold — 100% Pure Raw Jungle Honey & Organic Sidr Honey Pakistan",
-    template: "%s | Jungle Gold Pure Raw Honey",
+    default: "Jungle Gold — 100% Pure Raw Jungle Honey & Organic Sidr Honey Pakistan | Buy Online PK (Lahore, Karachi, Islamabad)",
+    template: "%s | Jungle Gold Pure Raw Honey Pakistan",
   },
   description:
-    "Buy 100% pure raw jungle honey, unpasteurized organic honey, and wild Sidr Beri honey harvested from Swat & Skardu, Pakistan. PCSIR lab certified with Cash on Delivery nationwide.",
+    "Buy 100% pure raw jungle honey, unpasteurized organic honey, and original Sidr Beri honey online in Pakistan (Lahore, Karachi, Islamabad, Rawalpindi, Gujrat). PCSIR lab certified with nationwide Cash on Delivery (COD).",
   keywords: [
     "pure raw jungle honey",
     "unpasteurized organic honey",
     "organic Sidr honey Pakistan",
     "wild Sidr Beri honey Swat",
+    "buy raw honey online PK",
+    "original sidr honey Lahore",
+    "pure raw honey Karachi",
+    "natural honey Islamabad",
     "pure honey price in Pakistan",
     "raw honey Gujrat",
     "natural honey delivery Pakistan",
@@ -37,6 +41,10 @@ export const metadata: Metadata = {
   ],
   alternates: {
     canonical: "https://junglegold.pk",
+    languages: {
+      "en-pk": "https://junglegold.pk",
+      "x-default": "https://junglegold.pk",
+    },
   },
   robots: {
     index: true,
@@ -49,16 +57,16 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "Jungle Gold — 100% Pure Raw Jungle Honey & Organic Sidr Honey Pakistan",
-    description: "Unfiltered, unpasteurized organic raw wild honey harvested directly from natural hives in Swat & Skardu. Lab certified with Cash on Delivery.",
+    title: "Jungle Gold — 100% Pure Raw Jungle Honey & Organic Sidr Honey Pakistan | Buy Online PK",
+    description: "Unfiltered, unpasteurized organic raw wild honey harvested directly from natural hives in Swat & Skardu. Lab certified with Cash on Delivery across Lahore, Karachi, Islamabad, and nationwide.",
     url: "https://junglegold.pk",
-    siteName: "Jungle Gold Pure Raw Honey",
+    siteName: "Jungle Gold Pure Raw Honey Pakistan",
     images: [
       {
         url: "https://junglegold.pk/brand-logo.png",
         width: 1200,
         height: 630,
-        alt: "Jungle Gold Pure Raw Jungle Honey",
+        alt: "Jungle Gold Pure Raw Jungle Honey Pakistan",
       },
     ],
     locale: "en_PK",
@@ -66,16 +74,18 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Jungle Gold — 100% Pure Raw Jungle Honey & Organic Sidr Honey Pakistan",
-    description: "Unfiltered, unpasteurized organic raw wild honey harvested directly from natural hives in Swat & Skardu. Lab certified with Cash on Delivery.",
+    title: "Jungle Gold — 100% Pure Raw Jungle Honey & Organic Sidr Honey Pakistan | Buy Online PK",
+    description: "Unfiltered, unpasteurized organic raw wild honey harvested directly from natural hives in Swat & Skardu. Lab certified with Cash on Delivery across Lahore, Karachi, Islamabad, and nationwide.",
     images: ["https://junglegold.pk/brand-logo.png"],
   },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${playfair.variable} ${inter.variable}`}>
+    <html lang="en-PK" className={`${playfair.variable} ${inter.variable}`}>
       <head>
+        <link rel="alternate" hrefLang="en-pk" href="https://junglegold.pk" />
+        <link rel="alternate" hrefLang="x-default" href="https://junglegold.pk" />
         <OrganizationSchema />
         <FAQSchema />
       </head>
