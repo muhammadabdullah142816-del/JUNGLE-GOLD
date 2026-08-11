@@ -171,9 +171,12 @@ export default function AuthenticityBlock() {
             <p className="font-serif text-3xl sm:text-4xl font-bold text-gold mb-3">
               Rs. 50,000 Purity Guarantee
             </p>
-            <p className="text-cream/60 max-w-lg mx-auto text-sm leading-relaxed">
+            <p className="text-cream/60 max-w-lg mx-auto text-sm leading-relaxed mb-3">
               We guarantee every jar is 100% pure. If independent lab testing finds any adulteration,
               we will refund your entire order plus pay Rs. 50,000. That is how confident we are.
+            </p>
+            <p className="text-gold/80 text-xs tracking-wide">
+              🌿 Backed by the legacy & trust of Razzaq Pansar Store.
             </p>
           </motion.div>
 

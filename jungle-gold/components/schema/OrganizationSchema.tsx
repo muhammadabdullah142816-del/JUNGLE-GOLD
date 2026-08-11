@@ -8,7 +8,7 @@ export default function OrganizationSchema() {
     logo: 'https://junglegold.pk/brand-logo.png',
     image: 'https://junglegold.pk/brand-logo.png',
     description:
-      "Pakistan's premier producer of 100% pure raw jungle honey and unpasteurized organic Sidr honey harvested from Swat, Skardu, and Margalla Hills. Delivering nationwide via Cash on Delivery.",
+      "Pakistan's premier producer of 100% pure raw jungle honey and unpasteurized organic Sidr honey harvested from Swat, Skardu, and Margalla Hills. Backed by the legacy & trust of Razzaq Pansar Store. Delivering nationwide via Cash on Delivery.",
     address: {
       '@type': 'PostalAddress',
       addressLocality: 'Gujrat',
@@ -19,6 +19,12 @@ export default function OrganizationSchema() {
       '@type': 'GeoCoordinates',
       latitude: '32.5742',
       longitude: '74.0754',
+    },
+    parentOrganization: {
+      '@type': 'Organization',
+      name: 'Razzaq Pansar Store',
+      description:
+        'A trusted authority in authentic herbal, natural, and traditional wellness products in Pakistan.',
     },
     areaServed: [
       {
@@ -68,6 +74,7 @@ export default function OrganizationSchema() {
       'Wild Forest Honey Swat & Skardu',
       'PCSIR Lab Tested Raw Honey',
       'Bee Pollen and Propolis',
+      'Razzaq Pansar Store Traditional Wellness',
     ],
     makesOffer: {
       '@type': 'Offer',

@@ -42,8 +42,11 @@ export default function Footer() {
               <div className="text-cream/40 text-xs tracking-widest uppercase mt-1">Raw Wild Forest Honey</div>
             </div>
           </div>
-          <p className="text-cream/70 text-sm font-medium mb-2 flex items-center gap-2">
+          <p className="text-cream/70 text-sm font-medium mb-1 flex items-center gap-2">
             <span className="text-gold">🔬</span> Lab tested from PCSIR
+          </p>
+          <p className="text-cream/50 text-xs mb-2">
+            Backed by the legacy & trust of Razzaq Pansar Store.
           </p>
           <p className="text-gold/70 text-sm italic font-serif">خالص شہد — براہ راست جنگل سے</p>
         </div>

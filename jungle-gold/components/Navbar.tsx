@@ -49,25 +49,25 @@ export default function Navbar() {
           </div>
 
           {/* Cart + Mobile menu */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <button
               onClick={() => openDrawer()}
-              className="relative p-2 text-cream/80 hover:text-gold transition-colors"
+              className="relative min-w-[48px] min-h-[48px] flex items-center justify-center p-2 text-cream/80 hover:text-gold transition-colors rounded-lg"
               aria-label="Open cart"
             >
               <ShoppingCart size={22} />
               {count > 0 && (
-                <span className="absolute -top-1 -right-1 bg-gold text-forest text-[11px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                <span className="absolute top-1 right-1 bg-gold text-forest text-[11px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-gold-glow">
                   {count}
                 </span>
               )}
             </button>
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className="md:hidden p-2 text-cream/80 hover:text-gold transition-colors"
+              className="md:hidden min-w-[48px] min-h-[48px] flex items-center justify-center p-2 text-cream/80 hover:text-gold transition-colors rounded-lg"
               aria-label="Toggle menu"
             >
-              {menuOpen ? <X size={22} /> : <Menu size={22} />}
+              {menuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
         </div>
