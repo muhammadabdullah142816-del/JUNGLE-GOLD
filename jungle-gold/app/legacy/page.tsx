@@ -5,7 +5,6 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { fetchLegacyMilestones } from "@/lib/api";
 import type { LegacyMilestone } from "@/types/database";
-import type { Metadata } from "next";
 
 export default function LegacyPage() {
   const [milestones, setMilestones] = useState<LegacyMilestone[]>([]);
@@ -83,7 +82,8 @@ export default function LegacyPage() {
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
                             src={milestone.image_url}
-                            alt={milestone.title}
+                            alt={`Jungle Gold Legacy Milestone - ${milestone.title}`}
+                            loading="lazy"
                             className="w-full h-64 object-cover rounded-2xl border border-gold/20 shadow-lg"
                           />
                         ) : (

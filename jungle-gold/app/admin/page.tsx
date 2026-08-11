@@ -21,10 +21,9 @@ import { logout } from "./login/actions";
 import type { Order, Product, OrderStatus, ProductVariant, Operator, LegacyMilestone, CreateLegacyPayload } from "@/types/database";
 import {
   Package, ShoppingBag, LogOut, RefreshCw,
-  TrendingUp, Clock, Truck, CheckCircle2,
+  TrendingUp, Clock, CheckCircle2,
   Search, XCircle, Plus, Image as ImageIcon, Trash2, Edit2, Users, BookOpen
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState<"orders" | "products" | "operators" | "legacy">("orders");
@@ -747,18 +746,22 @@ function LegacyTab() {
   const [imageUrl, setImageUrl] = useState("");
   const [displayOrder, setDisplayOrder] = useState(1);
 
-  async function loadMilestones() {
-    setLoading(true);
-    try {
-      const data = await fetchLegacyMilestones();
-      setMilestones(data);
-    } catch (err: unknown) {
-      if (err instanceof Error) console.error(err.message);
-    }
-    setLoading(false);
-  }
-
-  useEffect(() => { loadMilestones(); }, []);
+  useEffect(() => {
+    let mounted = true;
+    fetchLegacyMilestones()
+      .then((data) => {
+        if (mounted) setMilestones(data);
+      })
+      .catch((err) => {
+        if (err instanceof Error) console.error(err.message);
+      })
+      .finally(() => {
+        if (mounted) setLoading(false);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   function openModal(milestone: LegacyMilestone | null = null) {
     setEditing(milestone);
@@ -793,6 +796,15 @@ function LegacyTab() {
     setIsUploading(false);
   }
 
+  async function refreshMilestones() {
+    try {
+      const data = await fetchLegacyMilestones();
+      setMilestones(data);
+    } catch (err: unknown) {
+      if (err instanceof Error) console.error(err.message);
+    }
+  }
+
   async function handleSave() {
     if (!title || !yearOrDate) return alert("Year/Date and Title are required");
     setIsSaving(true);
@@ -803,7 +815,7 @@ function LegacyTab() {
       } else {
         await createLegacyAction(payload);
       }
-      await loadMilestones();
+      await refreshMilestones();
       setIsModalOpen(false);
     } catch (err: unknown) {
       if (err instanceof Error) alert("Failed to save: " + err.message);
@@ -815,7 +827,7 @@ function LegacyTab() {
     if (!confirm("Delete this milestone?")) return;
     try {
       await deleteLegacyAction(id);
-      await loadMilestones();
+      await refreshMilestones();
     } catch (err: unknown) {
       if (err instanceof Error) alert("Failed to delete: " + err.message);
     }
@@ -829,7 +841,7 @@ function LegacyTab() {
           <p className="text-cream/40 text-xs mt-1">Add milestones to your public <span className="text-gold">/legacy</span> page</p>
         </div>
         <div className="flex items-center gap-4">
-          <button onClick={loadMilestones} className="text-gold/70 hover:text-gold text-sm flex items-center gap-2"><RefreshCw size={14}/> Refresh</button>
+          <button onClick={refreshMilestones} className="text-gold/70 hover:text-gold text-sm flex items-center gap-2"><RefreshCw size={14}/> Refresh</button>
           <button onClick={() => openModal()} className="bg-gold text-forest px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-gold-light transition-all shadow-gold-glow">
             <Plus size={16} /> Add Milestone
           </button>

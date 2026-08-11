@@ -18,11 +18,21 @@ export default function ProductSchema({ products }: { products: Product[] }) {
       "@id": `https://junglegold.pk/#product-${product.id}`,
       "name": product.title,
       "image": product.images?.length > 0 ? product.images : ["https://junglegold.pk/products.jpg"],
-      "description": product.description || "100% pure raw wild forest honey, unheated, unfiltered and unprocessed.",
+      "description": product.description || "100% pure raw wild forest honey, unheated, unfiltered and unprocessed from Swat & Skardu, Pakistan.",
+      "sku": `JG-${product.id.substring(0, 8).toUpperCase()}`,
+      "mpn": `JUNGLEGOLD-${product.id.substring(0, 6).toUpperCase()}`,
       "brand": {
         "@type": "Brand",
-        "name": "Jungle Gold"
+        "name": "Jungle Gold Raw Honey"
       },
+      "category": "Organic Food > Honey & Sweeteners > Raw Honey",
+      "certification": [
+        {
+          "@type": "Certification",
+          "name": "100% Unpasteurized & Unheated Lab Certification",
+          "issuedBy": "Pakistan Council of Scientific and Industrial Research (PCSIR)"
+        }
+      ],
       "offers": {
         "@type": "AggregateOffer",
         "priceCurrency": "PKR",
@@ -34,14 +44,21 @@ export default function ProductSchema({ products }: { products: Product[] }) {
           "name": `${product.title} - ${v.size}`,
           "price": v.price,
           "priceCurrency": "PKR",
+          "itemCondition": "https://schema.org/NewCondition",
           "availability": v.in_stock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+          "seller": {
+            "@type": "Organization",
+            "name": "Jungle Gold"
+          },
           "url": "https://junglegold.pk/#products"
         }))
       },
       "aggregateRating": {
         "@type": "AggregateRating",
         "ratingValue": "4.9",
-        "reviewCount": "128"
+        "reviewCount": "148",
+        "bestRating": "5",
+        "worstRating": "1"
       }
     };
   });
