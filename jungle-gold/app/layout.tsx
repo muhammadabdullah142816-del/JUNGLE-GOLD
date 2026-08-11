@@ -80,6 +80,9 @@ export const metadata: Metadata = {
     description: "Unfiltered, unpasteurized organic raw wild honey harvested directly from natural hives in Swat & Skardu. Lab certified with Cash on Delivery across Lahore, Karachi, Islamabad. Backed by the trust of Razzaq Pansar Store.",
     images: ["https://junglegold.pk/brand-logo.png"],
   },
+  verification: {
+    google: "google0ccaa1cfd930e732",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
