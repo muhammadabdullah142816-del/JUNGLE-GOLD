@@ -1,0 +1,165 @@
+@import "tailwindcss";
+
+@theme {
+  /* ── Color palette ─────────────────────── */
+  --color-forest:     #0F2D1F;
+  --color-forest-50:  #1a4a33;
+  --color-forest-100: #163d2a;
+  --color-forest-200: #0F2D1F;
+  --color-forest-300: #0a1f15;
+  --color-forest-400: #06120c;
+
+  --color-gold:     #D4AF37;
+  --color-gold-50:  #f5e9a3;
+  --color-gold-100: #edd978;
+  --color-gold-200: #e5c94d;
+  --color-gold-300: #D4AF37;
+  --color-gold-400: #b8952e;
+  --color-gold-500: #9c7b25;
+
+  --color-cream:     #FDF6E3;
+  --color-cream-50:  #ffffff;
+  --color-cream-100: #FDF6E3;
+  --color-cream-200: #f9edd0;
+  --color-cream-300: #f3e2b5;
+
+  --color-bark:     #5C3D1E;
+  --color-bark-100: #7a5228;
+  --color-bark-200: #5C3D1E;
+  --color-bark-300: #3e2a15;
+
+  --color-honey:     #E8A020;
+  --color-honey-100: #f0bb55;
+  --color-honey-200: #E8A020;
+  --color-honey-300: #c4861a;
+
+  /* ── Typography ─────────────────────────── */
+  --font-serif: var(--font-playfair), Georgia, serif;
+  --font-sans:  var(--font-inter), system-ui, sans-serif;
+
+  /* ── Shadows ────────────────────────────── */
+  --shadow-gold-glow:    0 0 30px rgba(212,175,55,0.4);
+  --shadow-gold-glow-lg: 0 0 60px rgba(212,175,55,0.5);
+  --shadow-forest-deep:  0 25px 60px rgba(0,0,0,0.6);
+  --shadow-glass:        0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+}
+
+/* ── Base ────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background-color: var(--color-forest);
+  color: var(--color-cream);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Scrollbar ────────────────────────────────── */
+::-webkit-scrollbar        { width: 6px; }
+::-webkit-scrollbar-track  { background: #0a1f15; }
+::-webkit-scrollbar-thumb  { background: #D4AF37; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #E8A020; }
+
+/* ── Gold shimmer text ────────────────────────── */
+.gold-shimmer {
+  background: linear-gradient(90deg, #D4AF37 0%, #f5e9a3 40%, #D4AF37 60%, #E8A020 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 3s linear infinite;
+}
+
+@keyframes shimmer {
+  from { background-position: -200% center; }
+  to   { background-position:  200% center; }
+}
+
+/* ── Floating + glow animations ──────────────── */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-12px); }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(212,175,55,0.3); }
+  50%       { box-shadow: 0 0 50px rgba(212,175,55,0.7); }
+}
+
+.animate-float      { animation: float 6s ease-in-out infinite; }
+.animate-glow-pulse { animation: glow-pulse 3s ease-in-out infinite; }
+
+/* ── Glassmorphism cards ──────────────────────── */
+.glass-card {
+  background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(212,175,55,0.15);
+  border-radius: 1rem;
+}
+
+.glass-card-dark {
+  background: linear-gradient(135deg, rgba(15,45,31,0.85) 0%, rgba(10,31,21,0.9) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(212,175,55,0.2);
+}
+
+/* ── Gold gradient background ────────────────── */
+.bg-gold-gradient {
+  background: linear-gradient(135deg, #D4AF37 0%, #E8A020 50%, #D4AF37 100%);
+}
+
+/* ── Gold divider ────────────────────────────── */
+.gold-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #D4AF37, transparent);
+  width: 100%;
+}
+
+/* ── Honey drip top accent ────────────────────── */
+.honey-drip { position: relative; }
+.honey-drip::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #D4AF37, #E8A020, #D4AF37, transparent);
+  border-radius: 9999px 9999px 0 0;
+}
+
+/* ── Hex honeycomb pattern ────────────────────── */
+.hex-pattern {
+  background-image: url("data:image/svg+xml,%3Csvg width='56' height='100' viewBox='0 0 56 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M28 66L0 50V16L28 0l28 16v34L28 66zm0-18L8 37.4V18.6L28 8l20 10.6v18.8L28 48zm0 51.4L8 89.4V70.6L28 60l20 10.6v18.8L28 99.4z' fill='none' stroke='rgba(212,175,55,0.04)' stroke-width='1'/%3E%3C/svg%3E");
+}
+
+/* ── Product card hover ───────────────────────── */
+.product-card-hover {
+  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1),
+              box-shadow 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+.product-card-hover:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 0 40px rgba(212,175,55,0.35);
+}
+
+/* ── Shadow utilities ─────────────────────────── */
+.shadow-gold-glow    { box-shadow: var(--shadow-gold-glow); }
+.shadow-gold-glow-lg { box-shadow: var(--shadow-gold-glow-lg); }
+
+/* ── Urdu text ────────────────────────────────── */
+.urdu-text {
+  direction: rtl;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+/* ── Focus & selection ────────────────────────── */
+*:focus-visible { outline: 2px solid #D4AF37; outline-offset: 2px; }
+::selection     { background-color: rgba(212,175,55,0.25); color: #FDF6E3; }
+
+/* ── Hover bg utility used in admin table ────── */
+.hover\:bg-white\/3:hover { background-color: rgba(255,255,255,0.03); }
