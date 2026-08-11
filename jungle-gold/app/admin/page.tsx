@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/lib/supabase"; // needed for realtime only
-import { fetchOrders, fetchProducts, fetchOperators } from "@/lib/api";
+import { fetchOrders, fetchProducts, fetchOperators, fetchLegacyMilestones } from "@/lib/api";
 import {
   createProductAction,
   updateProductAction,
@@ -11,19 +11,23 @@ import {
   createOperatorAction,
   updateOperatorAction,
   deleteOperatorAction,
-  uploadOperatorImageAction
+  uploadOperatorImageAction,
+  createLegacyAction,
+  updateLegacyAction,
+  deleteLegacyAction,
+  uploadLegacyImageAction,
 } from "@/lib/admin-actions";
 import { logout } from "./login/actions";
-import type { Order, Product, OrderStatus, ProductVariant, Operator } from "@/types/database";
+import type { Order, Product, OrderStatus, ProductVariant, Operator, LegacyMilestone, CreateLegacyPayload } from "@/types/database";
 import {
   Package, ShoppingBag, LogOut, RefreshCw,
   TrendingUp, Clock, Truck, CheckCircle2,
-  Search, XCircle, Plus, Image as ImageIcon, Trash2, Edit2, Users
+  Search, XCircle, Plus, Image as ImageIcon, Trash2, Edit2, Users, BookOpen
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function AdminPage() {
-  const [activeTab, setActiveTab] = useState<"orders" | "products" | "operators">("orders");
+  const [activeTab, setActiveTab] = useState<"orders" | "products" | "operators" | "legacy">("orders");
 
   return (
     <div className="min-h-screen bg-forest text-cream font-sans pb-20">
@@ -63,6 +67,14 @@ export default function AdminPage() {
               >
                 <Users size={16} /> Team
               </button>
+              <button
+                onClick={() => setActiveTab("legacy")}
+                className={`flex items-center gap-2 text-sm font-medium transition-colors ${
+                  activeTab === "legacy" ? "text-gold" : "text-cream/50 hover:text-cream"
+                }`}
+              >
+                <BookOpen size={16} /> Legacy
+              </button>
             </nav>
             <div className="w-px h-6 bg-white/10" />
             <form action={logout}>
@@ -76,7 +88,7 @@ export default function AdminPage() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {activeTab === "orders" ? <OrdersTab /> : activeTab === "products" ? <ProductsTab /> : <OperatorsTab />}
+        {activeTab === "orders" ? <OrdersTab /> : activeTab === "products" ? <ProductsTab /> : activeTab === "operators" ? <OperatorsTab /> : <LegacyTab />}
       </main>
     </div>
   );
@@ -710,6 +722,201 @@ function OperatorsTab() {
               <button onClick={handleSave} disabled={isSaving} className="bg-gold text-forest px-6 py-2 rounded-lg font-bold hover:bg-gold-light transition-all flex items-center gap-2">
                 {isSaving ? <RefreshCw size={18} className="animate-spin" /> : <CheckCircle2 size={18} />}
                 {isSaving ? "Saving..." : "Save Member"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Legacy Tab ─────────────────────────────────────────────────────────────
+function LegacyTab() {
+  const [milestones, setMilestones] = useState<LegacyMilestone[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editing, setEditing] = useState<LegacyMilestone | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+
+  // Form fields
+  const [yearOrDate, setYearOrDate] = useState("");
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
+  const [displayOrder, setDisplayOrder] = useState(1);
+
+  async function loadMilestones() {
+    setLoading(true);
+    try {
+      const data = await fetchLegacyMilestones();
+      setMilestones(data);
+    } catch (err: unknown) {
+      if (err instanceof Error) console.error(err.message);
+    }
+    setLoading(false);
+  }
+
+  useEffect(() => { loadMilestones(); }, []);
+
+  function openModal(milestone: LegacyMilestone | null = null) {
+    setEditing(milestone);
+    if (milestone) {
+      setYearOrDate(milestone.year_or_date);
+      setTitle(milestone.title);
+      setDescription(milestone.description);
+      setImageUrl(milestone.image_url || "");
+      setDisplayOrder(milestone.display_order);
+    } else {
+      setYearOrDate("");
+      setTitle("");
+      setDescription("");
+      setImageUrl("");
+      setDisplayOrder(milestones.length + 1);
+    }
+    setIsModalOpen(true);
+  }
+
+  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    if (!e.target.files || e.target.files.length === 0) return;
+    setIsUploading(true);
+    try {
+      const file = e.target.files[0];
+      const formData = new FormData();
+      formData.append("file", file);
+      const url = await uploadLegacyImageAction(formData);
+      setImageUrl(url);
+    } catch (err: unknown) {
+      if (err instanceof Error) alert("Upload failed: " + err.message);
+    }
+    setIsUploading(false);
+  }
+
+  async function handleSave() {
+    if (!title || !yearOrDate) return alert("Year/Date and Title are required");
+    setIsSaving(true);
+    const payload: CreateLegacyPayload = { year_or_date: yearOrDate, title, description, image_url: imageUrl, display_order: displayOrder };
+    try {
+      if (editing) {
+        await updateLegacyAction(editing.id, payload);
+      } else {
+        await createLegacyAction(payload);
+      }
+      await loadMilestones();
+      setIsModalOpen(false);
+    } catch (err: unknown) {
+      if (err instanceof Error) alert("Failed to save: " + err.message);
+    }
+    setIsSaving(false);
+  }
+
+  async function handleDelete(id: string) {
+    if (!confirm("Delete this milestone?")) return;
+    try {
+      await deleteLegacyAction(id);
+      await loadMilestones();
+    } catch (err: unknown) {
+      if (err instanceof Error) alert("Failed to delete: " + err.message);
+    }
+  }
+
+  return (
+    <div className="space-y-6 max-w-5xl mx-auto">
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h2 className="font-serif text-xl font-bold text-cream">Our Legacy</h2>
+          <p className="text-cream/40 text-xs mt-1">Add milestones to your public <span className="text-gold">/legacy</span> page</p>
+        </div>
+        <div className="flex items-center gap-4">
+          <button onClick={loadMilestones} className="text-gold/70 hover:text-gold text-sm flex items-center gap-2"><RefreshCw size={14}/> Refresh</button>
+          <button onClick={() => openModal()} className="bg-gold text-forest px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-gold-light transition-all shadow-gold-glow">
+            <Plus size={16} /> Add Milestone
+          </button>
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="text-center py-10 text-cream/40">Loading milestones...</div>
+      ) : milestones.length === 0 ? (
+        <div className="text-center py-16 glass-card rounded-2xl border border-gold/10">
+          <BookOpen size={40} className="mx-auto text-gold/30 mb-4" />
+          <p className="text-cream/40">No milestones yet. Click &quot;Add Milestone&quot; to start your legacy story.</p>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-4">
+          {milestones.map((m) => (
+            <div key={m.id} className="glass-card rounded-xl border border-gold/10 p-5 flex items-start gap-5">
+              {m.image_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={m.image_url} alt={m.title} className="w-24 h-24 object-cover rounded-lg flex-shrink-0" />
+              ) : (
+                <div className="w-24 h-24 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0">
+                  <ImageIcon size={24} className="text-cream/20" />
+                </div>
+              )}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-3 mb-1">
+                  <span className="text-xs bg-gold/20 text-gold px-2 py-0.5 rounded-full font-bold">#{m.display_order}</span>
+                  <span className="text-gold text-sm font-semibold">{m.year_or_date}</span>
+                </div>
+                <h3 className="font-serif text-lg font-bold text-cream truncate">{m.title}</h3>
+                <p className="text-cream/60 text-sm mt-1 line-clamp-2">{m.description}</p>
+              </div>
+              <div className="flex gap-2 flex-shrink-0">
+                <button onClick={() => openModal(m)} className="p-2 text-gold/60 hover:text-gold transition-colors"><Edit2 size={16} /></button>
+                <button onClick={() => handleDelete(m.id)} className="p-2 text-red-400/60 hover:text-red-400 transition-colors"><Trash2 size={16} /></button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+          <div className="bg-forest border border-gold/20 rounded-2xl p-8 w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="font-serif text-xl font-bold text-gold">{editing ? "Edit Milestone" : "New Milestone"}</h3>
+              <button onClick={() => setIsModalOpen(false)}><XCircle size={24} className="text-cream/40 hover:text-cream" /></button>
+            </div>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm text-cream/70 mb-1">Year / Date *</label>
+                  <input value={yearOrDate} onChange={e => setYearOrDate(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-cream focus:border-gold outline-none" placeholder="e.g. 2018, March 2020" />
+                </div>
+                <div>
+                  <label className="block text-sm text-cream/70 mb-1">Display Order</label>
+                  <input type="number" value={displayOrder} onChange={e => setDisplayOrder(Number(e.target.value))} className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-cream focus:border-gold outline-none" min={1} />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm text-cream/70 mb-1">Title *</label>
+                <input value={title} onChange={e => setTitle(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-cream focus:border-gold outline-none" placeholder="e.g. Founded in the Forests of Swat" />
+              </div>
+              <div>
+                <label className="block text-sm text-cream/70 mb-1">Description</label>
+                <textarea value={description} onChange={e => setDescription(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-cream focus:border-gold outline-none h-28 resize-none" placeholder="Describe this milestone..." />
+              </div>
+              <div>
+                <label className="block text-sm text-cream/70 mb-2">Image</label>
+                {imageUrl && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={imageUrl} alt="Preview" className="w-full h-40 object-cover rounded-lg mb-3" />
+                )}
+                <label className="flex items-center gap-2 cursor-pointer border border-dashed border-gold/30 rounded-lg p-3 text-cream/50 hover:text-cream hover:border-gold/60 transition-all">
+                  {isUploading ? <RefreshCw size={16} className="animate-spin" /> : <ImageIcon size={16} />}
+                  <span className="text-sm">{isUploading ? "Uploading..." : "Upload Image"}</span>
+                  <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={isUploading} />
+                </label>
+              </div>
+            </div>
+            <div className="mt-8 pt-6 border-t border-white/10 flex justify-end gap-3">
+              <button onClick={() => setIsModalOpen(false)} className="px-5 py-2 text-cream/70 hover:text-cream">Cancel</button>
+              <button onClick={handleSave} disabled={isSaving} className="bg-gold text-forest px-6 py-2 rounded-lg font-bold hover:bg-gold-light transition-all flex items-center gap-2">
+                {isSaving ? <RefreshCw size={18} className="animate-spin" /> : <CheckCircle2 size={18} />}
+                {isSaving ? "Saving..." : "Save Milestone"}
               </button>
             </div>
           </div>

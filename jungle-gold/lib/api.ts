@@ -1,5 +1,5 @@
 import { supabase } from "./supabase";
-import type { Order, Product, CreateOrderPayload, OrderStatus, Operator } from "@/types/database";
+import type { Order, Product, CreateOrderPayload, Operator, LegacyMilestone } from "@/types/database";
 
 // ─── Security Helpers ────────────────────────────────────────────────────────
 
@@ -114,3 +114,14 @@ export async function fetchOperators(): Promise<Operator[]> {
   if (error) throw new Error("Failed to fetch operators: " + error.message);
   return data as Operator[];
 }
+
+export async function fetchLegacyMilestones(): Promise<LegacyMilestone[]> {
+  const { data, error } = await supabase
+    .from("legacy_milestones")
+    .select("*")
+    .order("display_order", { ascending: true });
+
+  if (error) throw new Error("Failed to fetch legacy milestones: " + error.message);
+  return data as LegacyMilestone[];
+}
+

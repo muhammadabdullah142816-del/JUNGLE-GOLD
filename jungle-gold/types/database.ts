@@ -51,3 +51,16 @@ export interface Operator {
 }
 
 export type CreateOperatorPayload = Omit<Operator, "id" | "created_at">;
+
+export interface LegacyMilestone {
+  id: string;
+  year_or_date: string;
+  title: string;
+  description: string;
+  image_url: string;
+  display_order: number;
+  created_at: string;
+}
+
+export type CreateLegacyPayload = Omit<LegacyMilestone, "id" | "created_at">;
+
