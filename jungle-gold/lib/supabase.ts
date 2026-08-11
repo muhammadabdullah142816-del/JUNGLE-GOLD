@@ -1,13 +1,10 @@
 import { createClient } from "@supabase/supabase-js";
 
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const url = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder-supabase-url.supabase.co";
+const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder-anon-key";
 
-if (!url) {
-  throw new Error("Missing environment variable: NEXT_PUBLIC_SUPABASE_URL");
-}
-if (!key) {
-  throw new Error("Missing environment variable: NEXT_PUBLIC_SUPABASE_ANON_KEY");
+if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+  console.warn("Supabase environment variables (NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY) are missing. Using fallback mock client.");
 }
 
 export const supabase = createClient(url, key);
